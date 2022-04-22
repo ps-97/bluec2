@@ -13,7 +13,7 @@ import {
   Stack,
   useToast,
 } from "@chakra-ui/react";
-import { Select, CreatableSelect, AsyncSelect } from "chakra-react-select";
+import SkillSelect from "../../components/skill_select";
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -26,8 +26,6 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [isWorker, setIsWorker] = useState(true);
   const [skillIds, setSkillIds] = useState([]);
-  const [skills, setSkills] = useState([]);
-  const [groupedSkills, setGroupedSkills] = useState([]);
 
   const { push } = useRouter();
   const toast = useToast();
@@ -54,16 +52,25 @@ export default function Signup() {
     console.log(email, password, name, phonenumber, skillIds);
     e.preventDefault();
     axios
-      .post("http://localhost:3003/users", {
+      .post(`${process.env.URL}/users`, {
         email: email,
         password: password,
         name: name,
         phone_number: phonenumber,
         skill_ids: skillIds,
+        is_worker: isWorker,
+      })
+      .then((response) => {
+    axios
+      .post(`${process.env.URL}/login`, {
+        email: email,
+        password: password,
       })
       .then((response) => {
         localStorage.setItem("authToken", response.data.token);
-        console.log("here");
+        localStorage.setItem("isWorker", response.data.is_worker);
+        push("/");
+      })
         push("/");
       })
       .catch(() =>
@@ -76,29 +83,6 @@ export default function Signup() {
         })
       );
   };
-
-  useEffect(() => {
-    const skillOptions = axios
-      .get("http://localhost:3003/skills", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      })
-      .then((response) =>
-        response.data.map((skill) => ({ value: skill.id, label: skill.name }))
-      )
-      .then(setSkills);
-  }, []);
-
-  useEffect(() => {
-    console.log(skills);
-    setGroupedSkills([
-      {
-        label: "skills",
-        options: skills,
-      },
-    ]);
-  }, [skills]);
 
   return (
     <Flex width="full" alignItems="center" justifyContent="center" minH="100vh">
@@ -140,13 +124,10 @@ export default function Signup() {
             </FormControl>
             {isWorker === "true" ? (
               <FormControl mt={6}>
-                <Select
-                  id="skills"
-                  name="skills"
-                  options={groupedSkills}
-                  placeholder="Select your skills..."
+                <SkillSelect
+                  placeholder={"select your skills"}
+                  isMulti={true}
                   closeMenuOnSelect={false}
-                  isMulti
                   onChange={(e) => setSkillIds(e.map((skill) => skill.value))}
                 />
               </FormControl>

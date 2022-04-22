@@ -1,11 +1,13 @@
 import "../styles/global.css";
 import { ChakraProvider } from "@chakra-ui/react";
 import { SessionProvider } from "next-auth/react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Layout from "../components/layout";
 
 export default function App({ Component, pageProps, sessio }) {
   const { push, pathname } = useRouter();
+  const [authToken, setAuthToken] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -18,7 +20,9 @@ export default function App({ Component, pageProps, sessio }) {
   }, []);
   return (
     <ChakraProvider resetCSS>
-      <Component {...pageProps} />
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
     </ChakraProvider>
   );
 }

@@ -31,13 +31,13 @@ export default function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:3003/login", {
+      .post(`${process.env.URL}/login`, {
         email: email,
         password: password,
       })
       .then((response) => {
         localStorage.setItem("authToken", response.data.token);
-        console.log("here");
+        localStorage.setItem("isWorker", response.data.is_worker);
         push("/");
       })
       .catch(() =>
